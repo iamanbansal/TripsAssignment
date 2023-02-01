@@ -54,7 +54,7 @@ data class Price(
     val amount: BigDecimal,
     val scale: Int
 ) {
-    private constructor(currency: String, amount: Int, scale: Int): this(currency, BigDecimal(amount), scale)
+    private constructor(currency: String, amount: Int, scale: Int) : this(currency, BigDecimal(amount), scale)
 
     companion object {
         val mocksEUR = listOf(
@@ -97,4 +97,13 @@ data class Booker(
     val id: Int,
     val firstName: String,
     val lastName: String
+)
+
+data class BookingChain(
+    val list: List<Booking>,
+    val checkin: LocalDate,
+    val checkout: LocalDate,
+    val dateRange: String,
+    val title: String,
+    val subTitle: String
 )

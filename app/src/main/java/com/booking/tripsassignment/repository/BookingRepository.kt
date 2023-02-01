@@ -1,10 +1,11 @@
 package com.booking.tripsassignment.repository
 
-import android.os.Looper
 import com.booking.tripsassignment.data.Booking
 import com.booking.tripsassignment.utils.NetworkError
-import com.booking.tripsassignment.utils.Result
-import java.lang.RuntimeException
+import com.booking.tripsassignment.utils.Resource
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlin.random.Random
 
 /**
@@ -12,13 +13,17 @@ import kotlin.random.Random
  */
 interface BookingRepository {
     /**
-     * Returns list of bookings for a given user Id.
+     * Emit list of bookings for a given user Id into flow.
      *
      * Assumptions:
      *
-     *  - All the bookings returned will belong to that user.
+     *  - All the bookings emitted will belong to that user.
      */
-    fun fetchBookings(userId: Int): Result<List<Booking>>
+    suspend fun fetchBookings(userId: Int): Boolean
+    /**
+     * Return the flow of state of list of booking
+     */
+    fun getBookingsFlow(): Flow<Resource<List<Booking>>>
 }
 
 /**
@@ -27,17 +32,24 @@ interface BookingRepository {
  */
 class MockNetworkBookingRepository : BookingRepository {
 
-    override fun fetchBookings(userId: Int): Result<List<Booking>> {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            throw RuntimeException("fetchBookings called on main thread!")
-        }
+    private val resultFlow = MutableSharedFlow<Resource<List<Booking>>>(replay = 1)
 
-        Thread.sleep(Random.nextInt(10, 2000).toLong())
+    override suspend fun fetchBookings(userId: Int) :Boolean {
+        resultFlow.tryEmit(Resource.Loading)
+
+        delay(Random.nextInt(10, 2000).toLong())
         if (Random.nextInt(0, 21) % 10 == 0) {
-            return Result.Error(NetworkError("API call error"))
+            resultFlow.tryEmit(Resource.Error(NetworkError("API call error")))
         }
 
-        val bookings = MockDataGenerator.bookingsForUser(userId)  ?: return Result.Error(NetworkError("API call error"))
-        return Result.Success(bookings)
+        val bookings = MockDataGenerator.bookingsForUser(userId)
+        if (bookings == null) {
+            resultFlow.tryEmit(Resource.Error(NetworkError("API call error")))
+        } else {
+            resultFlow.tryEmit(Resource.Success(bookings))
+        }
+        return  true
     }
+
+    override fun getBookingsFlow() = resultFlow
 }
