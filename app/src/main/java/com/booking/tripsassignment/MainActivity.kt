@@ -3,6 +3,7 @@ package com.booking.tripsassignment
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import com.booking.tripsassignment.databinding.ActivityMainScreenBinding
 import com.booking.tripsassignment.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,11 +21,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         viewModel.bookingChainsLiveData.observe(this){
+            binding.progressBar.isVisible = it is Resource.Loading
+            binding.message.isVisible = it is Resource.Error
+            binding.recyclerview.isVisible = it is Resource.Success
 
             when(it){
                 is Resource.Success->{
-                    binding.recyclerview.adapter = BookingChainAdapter(it.data()!!)
-
+                    if(it.data()!!.isEmpty()){
+                        binding.recyclerview.isVisible = false
+                        binding.message.text="Travel Booking Not Found"
+                        binding.message.isVisible = true
+                    }else {
+                        binding.recyclerview.adapter = BookingChainAdapter(it.data()!!)
+                    }
+                }
+                is Resource.Error->{
+                    binding.message.text = it.exception.message
                 }
             }
         }
