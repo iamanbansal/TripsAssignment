@@ -2,6 +2,8 @@ package com.booking.tripsassignment.usecase
 
 import com.booking.tripsassignment.data.Booking
 import com.booking.tripsassignment.data.BookingChain
+import com.booking.tripsassignment.data.Chain
+import com.booking.tripsassignment.data.ChainTitle
 import com.booking.tripsassignment.repository.BookingRepository
 import com.booking.tripsassignment.repository.TestCase
 import com.booking.tripsassignment.utils.Resource
@@ -12,18 +14,16 @@ import kotlinx.coroutines.flow.mapLatest
 import org.joda.time.LocalDate
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
-import kotlin.Comparator
-import kotlin.collections.ArrayList
 
-interface BookingChainUseCase{
-    fun getBookingsChain(): Flow<Resource<List<BookingChain>>>
-    suspend fun fetchBookings(id:Int = TestCase.PAST_CHAIN.bookerId)
+interface BookingChainUseCase {
+    fun getBookingsChain(): Flow<Resource<List<Chain>>>
+    suspend fun fetchBookings(id: Int = TestCase.POWER_USER.bookerId)
 }
-class BookingChainUseCaseImpl (
+
+class BookingChainUseCaseImpl(
     private val bookingRepository: BookingRepository
-):BookingChainUseCase {
-    override fun getBookingsChain(): Flow<Resource<List<BookingChain>>> {
+) : BookingChainUseCase {
+    override fun getBookingsChain(): Flow<Resource<List<Chain>>> {
         return bookingRepository.getBookingsFlow()
             .mapLatest {
                 when (it) {
@@ -41,7 +41,7 @@ class BookingChainUseCaseImpl (
         bookingRepository.fetchBookings(id)
     }
 
-    private fun buildChainBySorting(list: List<Booking>): List<BookingChain> {
+    private fun buildChainBySorting(list: List<Booking>): List<Chain> {
 
         val today = LocalDate.now()
         val map = mutableMapOf<LocalDate, ArrayList<Booking>>()
@@ -60,9 +60,26 @@ class BookingChainUseCaseImpl (
             }
         }
 
-        return ArrayList<BookingChain>().apply {
-            chains.forEach {
-                this.add(buildBookingChain(it))
+        val now = LocalDate.now()
+        val pastChains = arrayListOf<Chain>()
+        val upComingChains = arrayListOf<Chain>()
+
+        chains.forEach {
+            val chain = buildBookingChain(it)
+            if (chain.checkin.isBefore(now)) {
+                pastChains.add(chain)
+            } else {
+                upComingChains.add(chain)
+            }
+        }
+        return ArrayList<Chain>().apply {
+            if (upComingChains.isNotEmpty()) {
+                this.add(ChainTitle("Upcoming Trips"))
+                this.addAll(upComingChains)
+            }
+            if (pastChains.isNotEmpty()) {
+                this.add(ChainTitle("Past Trips"))
+                this.addAll(pastChains)
             }
         }
     }
@@ -74,7 +91,8 @@ class BookingChainUseCaseImpl (
             chain.last().checkout,
             getFormattedDateRange(chain),
             getFormattedTitle(chain),
-            getFormattedBookings(chain)
+            getFormattedBookings(chain),
+            chain.first().hotel.mainPhoto
         )
     }
 
@@ -92,7 +110,7 @@ class BookingChainUseCaseImpl (
             1 -> uniqueTitleList.first()
             2 -> String.format("%s and %s", uniqueTitleList.first(), uniqueTitleList.last())
             else -> {
-                val lastCities = uniqueTitleList.take(uniqueTitleList.size-1).joinToString(", ")
+                val lastCities = uniqueTitleList.take(uniqueTitleList.size - 1).joinToString(", ")
                 String.format("%s and %s", lastCities, uniqueTitleList.last())
             }
         }
@@ -111,13 +129,24 @@ class BookingChainUseCaseImpl (
         } else {
             DateFormatter.DIFF_YEAR
         }
-        return "${formatter.startDateFormat.format(startDate)}-${formatter.endDateFormat.format(endDate)}"
+        return formatter.startDateFormat.format(startDate) +
+                "-" +
+                formatter.endDateFormat.format(endDate)
     }
 
 
-    enum class DateFormatter(val startDateFormat: SimpleDateFormat, val endDateFormat: SimpleDateFormat) {
-        SAME_MONTH_YEAR(SimpleDateFormat("d", Locale.ENGLISH), SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)),
-        SAME_YEAR(SimpleDateFormat("d MMM", Locale.ENGLISH), SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)),
+    enum class DateFormatter(
+        val startDateFormat: SimpleDateFormat,
+        val endDateFormat: SimpleDateFormat
+    ) {
+        SAME_MONTH_YEAR(
+            SimpleDateFormat("d", Locale.ENGLISH),
+            SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)
+        ),
+        SAME_YEAR(
+            SimpleDateFormat("d MMM", Locale.ENGLISH),
+            SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)
+        ),
         DIFF_YEAR(
             SimpleDateFormat("d MMM yyyy", Locale.ENGLISH),
             SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)

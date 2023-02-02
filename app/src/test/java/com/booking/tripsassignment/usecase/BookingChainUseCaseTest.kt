@@ -1,5 +1,7 @@
 package com.booking.tripsassignment.usecase
 
+import com.booking.tripsassignment.data.BookingChain
+import com.booking.tripsassignment.data.ChainTitle
 import com.booking.tripsassignment.repository.BookingRepository
 import com.booking.tripsassignment.repository.MockDataGenerator
 import com.booking.tripsassignment.repository.TestCase
@@ -56,12 +58,17 @@ class BookingChainUseCaseTest {
             useCase.getBookingsChain().collect {
                 assert(it is Resource.Success)
                 val chains = it.data()!!
-                assert(chains.size == 1)
-                assert(chains.first().checkin == chains.first().checkin)
-                assert(chains.first().checkout == chains.last().checkout)
-                assert(chains.first().title == "Milan, Florence and Amalfi")
-                assert(chains.first().dateRange == "2-31 Jan 2023")
-                assert(chains.first().subTitle == "7 bookings")
+                assert(chains.size == 2)
+
+                val title = chains.first() as ChainTitle
+                assert(title.title == "Past Trips")
+                val chain = chains[1] as BookingChain
+                val last = chains.last() as BookingChain
+                assert(chain.checkin == chain.checkin)
+                assert(chain.checkout == last.checkout)
+                assert(chain.title == "Milan, Florence and Amalfi")
+                assert(chain.subTitle == "7 bookings")
+                assert(chain.imageUrl == chain.list.first().hotel.mainPhoto)
             }
         }
     }

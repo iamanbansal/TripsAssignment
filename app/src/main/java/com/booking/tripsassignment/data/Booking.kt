@@ -99,11 +99,18 @@ data class Booker(
     val lastName: String
 )
 
+interface Chain
+
 data class BookingChain(
     val list: List<Booking>,
     val checkin: LocalDate,
     val checkout: LocalDate,
     val dateRange: String,
     val title: String,
-    val subTitle: String
-)
+    val subTitle: String,
+    val imageUrl:String
+):Chain
+
+data class ChainTitle(
+    val title:String
+):Chain

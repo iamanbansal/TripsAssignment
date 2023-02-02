@@ -1,7 +1,7 @@
 package com.booking.tripsassignment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.booking.tripsassignment.data.BookingChain
+import com.booking.tripsassignment.data.Chain
 import com.booking.tripsassignment.usecase.BookingChainUseCase
 import com.booking.tripsassignment.utils.NetworkError
 import com.booking.tripsassignment.utils.Resource
@@ -34,10 +34,10 @@ class BookingChainViewModelTest {
     @Test
     fun `test live data should emit as same data as useCase flow `() = runTest(StandardTestDispatcher()) {
         val expectedFlow =
-            flowOf(Resource.Loading, Resource.Success(listOf<BookingChain>()), Resource.Error(NetworkError()))
+            flowOf(Resource.Loading, Resource.Success(listOf<Chain>()), Resource.Error(NetworkError()))
 
-        val actualList = arrayListOf<Resource<List<BookingChain>>>()
-        val expectedList = arrayListOf<Resource<List<BookingChain>>>()
+        val actualList = arrayListOf<Resource<List<Chain>>>()
+        val expectedList = arrayListOf<Resource<List<Chain>>>()
         whenever(bookingChainUseCase.getBookingsChain()).thenReturn(expectedFlow)
         viewModel = BookingChainViewModel(bookingChainUseCase)
 

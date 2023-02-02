@@ -3,9 +3,11 @@ package com.booking.tripsassignment.repository
 import com.booking.tripsassignment.data.Booking
 import com.booking.tripsassignment.utils.NetworkError
 import com.booking.tripsassignment.utils.Resource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 /**
@@ -34,7 +36,7 @@ class MockNetworkBookingRepository : BookingRepository {
 
     private val resultFlow = MutableSharedFlow<Resource<List<Booking>>>(replay = 1)
 
-    override suspend fun fetchBookings(userId: Int) :Boolean {
+    override suspend fun fetchBookings(userId: Int) = withContext(Dispatchers.IO) {
         resultFlow.tryEmit(Resource.Loading)
 
         delay(Random.nextInt(10, 2000).toLong())
@@ -48,7 +50,6 @@ class MockNetworkBookingRepository : BookingRepository {
         } else {
             resultFlow.tryEmit(Resource.Success(bookings))
         }
-        return  true
     }
 
     override fun getBookingsFlow() = resultFlow
