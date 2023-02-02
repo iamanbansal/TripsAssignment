@@ -16,10 +16,14 @@ import javax.inject.Inject
 import kotlin.Comparator
 import kotlin.collections.ArrayList
 
-class BookingChainUseCase @Inject constructor(
+interface BookingChainUseCase{
+    fun getBookingsChain(): Flow<Resource<List<BookingChain>>>
+    suspend fun fetchBookings(id:Int = TestCase.PAST_CHAIN.bookerId)
+}
+class BookingChainUseCaseImpl (
     private val bookingRepository: BookingRepository
-) {
-    fun getBookingsChain(): Flow<Resource<List<BookingChain>>> {
+):BookingChainUseCase {
+    override fun getBookingsChain(): Flow<Resource<List<BookingChain>>> {
         return bookingRepository.getBookingsFlow()
             .mapLatest {
                 when (it) {
@@ -33,11 +37,11 @@ class BookingChainUseCase @Inject constructor(
             }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun fetchBookings(id: Int = TestCase.PAST_CHAIN.bookerId) {
+    override suspend fun fetchBookings(id: Int) {
         bookingRepository.fetchBookings(id)
     }
 
-    fun buildChainBySorting(list: List<Booking>): List<BookingChain> {
+    private fun buildChainBySorting(list: List<Booking>): List<BookingChain> {
 
         val today = LocalDate.now()
         val map = mutableMapOf<LocalDate, ArrayList<Booking>>()

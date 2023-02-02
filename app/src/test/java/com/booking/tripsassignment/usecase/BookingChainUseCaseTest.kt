@@ -15,12 +15,12 @@ import org.mockito.kotlin.whenever
 
 class BookingChainUseCaseTest {
 
-    lateinit var useCase: BookingChainUseCase
+    private lateinit var useCase: BookingChainUseCase
     private val repository: BookingRepository = mock()
 
     @Before
     fun setUp() {
-        useCase = BookingChainUseCase(repository)
+        useCase = BookingChainUseCaseImpl(repository)
     }
 
     @Test
