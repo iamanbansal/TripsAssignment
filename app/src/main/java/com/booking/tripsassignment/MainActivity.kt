@@ -2,8 +2,9 @@ package com.booking.tripsassignment
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
+import com.booking.tripsassignment.databinding.ActivityMainScreenBinding
+import com.booking.tripsassignment.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -11,14 +12,21 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val viewModel:BookingChainViewModel by viewModels()
+    private lateinit var binding:ActivityMainScreenBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_screen)
+        binding = ActivityMainScreenBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel.bookingChainsLiveData.observe(this){
 
-            Log.d("MainActivity","*****MainActivity $it")
+            when(it){
+                is Resource.Success->{
+                    binding.recyclerview.adapter = BookingChainAdapter(it.data()!!)
+
+                }
+            }
         }
     }
 }
