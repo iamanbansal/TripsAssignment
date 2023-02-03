@@ -1,4 +1,4 @@
-package com.booking.tripsassignment.usecase
+package com.booking.tripsassignment.utils
 
 import java.text.SimpleDateFormat
 import java.util.*

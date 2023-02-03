@@ -4,20 +4,24 @@ import com.booking.tripsassignment.data.Booking
 import com.booking.tripsassignment.data.BookingChain
 import com.booking.tripsassignment.data.Chain
 import com.booking.tripsassignment.data.ChainTitle
-import com.booking.tripsassignment.usecase.DateFormatter
 import org.joda.time.LocalDate
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.Comparator
 
+const val PAST_TRIPS_TITLE = "Past Trips"
+const val UPCOMING_TRIPS_TITLE = "Upcoming Trips"
 fun buildChainBySorting(list: List<Booking>): List<Chain> {
     if (list.isEmpty()) return emptyList()
 
+    //sort based on sorting
     Collections.sort(list, Comparator { b1, b2 -> b1.checkin.compareTo(b2.checkin) })
 
     val chains = ArrayList<ArrayList<Booking>>()
 
     chains.add(arrayListOf(list.first()))
 
+    //segregate chronological bookings into list of chain
     for (i in 1..list.lastIndex) {
         if (list[i].checkin == chains.last().last().checkout) {
             chains.last().add(list[i])
@@ -30,6 +34,7 @@ fun buildChainBySorting(list: List<Booking>): List<Chain> {
     val pastChains = arrayListOf<Chain>()
     val upComingChains = arrayListOf<Chain>()
 
+    //segregate chains into past and upcoming bookings
     chains.forEach {
         val chain = buildBookingChain(it)
         if (chain.checkin.isBefore(now)) {
@@ -38,13 +43,15 @@ fun buildChainBySorting(list: List<Booking>): List<Chain> {
             upComingChains.add(chain)
         }
     }
+
+    //merge lists with title
     return ArrayList<Chain>().apply {
         if (upComingChains.isNotEmpty()) {
-            this.add(ChainTitle("Upcoming Trips"))
+            this.add(ChainTitle(UPCOMING_TRIPS_TITLE))
             this.addAll(upComingChains)
         }
         if (pastChains.isNotEmpty()) {
-            this.add(ChainTitle("Past Trips"))
+            this.add(ChainTitle(PAST_TRIPS_TITLE))
             this.addAll(pastChains)
         }
     }
@@ -57,12 +64,17 @@ fun buildBookingChain(chain: List<Booking>): BookingChain {
         chain.last().checkout,
         getFormattedDateRange(chain),
         getFormattedTitle(chain),
-        getFormattedBookings(chain),
+        getFormattedBookingsCount(chain),
         chain.first().hotel.mainPhoto
     )
 }
 
-fun getFormattedBookings(chain: List<Booking>): String {
+/**
+ *  @param chain list of all bookings in the chain
+ *  @return Number of bookings with suffix "booking/s"
+ */
+
+fun getFormattedBookingsCount(chain: List<Booking>): String {
     return if (chain.size == 1) {
         "1 booking"
     } else {
@@ -70,9 +82,15 @@ fun getFormattedBookings(chain: List<Booking>): String {
     }
 }
 
+/**
+ *  Format names of the booking locations (cities) in chronological order prefixed with "Trip to "
+ *  @param chain list of all bookings in the chain
+ *  @return formatter String of all cities
+ */
 fun getFormattedTitle(chain: List<Booking>): String {
     val uniqueTitleList = chain.map { it.hotel.cityName }.toSet().toList()
-    return when (uniqueTitleList.size) {
+    val builder = StringBuilder("Trips to ")
+    val cities = when (uniqueTitleList.size) {
         1 -> uniqueTitleList.first()
         2 -> String.format("%s and %s", uniqueTitleList.first(), uniqueTitleList.last())
         else -> {
@@ -80,8 +98,14 @@ fun getFormattedTitle(chain: List<Booking>): String {
             String.format("%s and %s", lastCities, uniqueTitleList.last())
         }
     }
+    return builder.append(cities).toString()
 }
 
+/**
+ *  Format date range for booking chain based on checkin of first booking and checkout of last booking
+ *  @param chain list of all bookings in the chain
+ *  @return formatter date range
+ */
 fun getFormattedDateRange(chain: List<Booking>): String {
     val startDate = chain.first().checkin.toDate()
     val endDate = chain.last().checkout.toDate()

@@ -161,7 +161,7 @@ object MockDataGenerator {
     }
 }
 
-private fun buildBooking(booker: Booker, hotel: Hotel, price: Price, days: Int, duration: Int): Booking {
+fun buildBooking(booker: Booker, hotel: Hotel, price: Price, days: Int, duration: Int): Booking {
     val id = "$booker-$hotel-$price-$days-$duration"
     val today = LocalDate.now()
 

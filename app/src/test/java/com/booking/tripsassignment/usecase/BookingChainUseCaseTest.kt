@@ -66,7 +66,7 @@ class BookingChainUseCaseTest {
                 val last = chains.last() as BookingChain
                 assert(chain.checkin == chain.checkin)
                 assert(chain.checkout == last.checkout)
-                assert(chain.title == "Milan, Florence and Amalfi")
+                assert(chain.title == "Trips to Milan, Florence and Amalfi")
                 assert(chain.subTitle == "7 bookings")
                 assert(chain.imageUrl == chain.list.first().hotel.mainPhoto)
             }
