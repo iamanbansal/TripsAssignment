@@ -10,7 +10,7 @@ import com.booking.tripsassignment.databinding.TripCardItemLayoutBinding
 import com.booking.tripsassignment.databinding.TripsHeaderItemLayoutBinding
 import com.booking.tripsassignment.utils.ImageLoader
 
-class BookingChainAdapter(private val list: List<Chain>) :
+class BookingChainAdapter(private val list: List<Chain>, private val listener: ClickListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
@@ -53,7 +53,7 @@ class BookingChainAdapter(private val list: List<Chain>) :
 
     }
 
-    class BookingChainViewHolder(
+    inner class BookingChainViewHolder(
         private val binding: TripCardItemLayoutBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -62,16 +62,24 @@ class BookingChainAdapter(private val list: List<Chain>) :
             dates.text = item.dateRange
             nights.text = item.subTitle
             ImageLoader.loadImage(tripImage, item.imageUrl)
+
+            binding.root.setOnClickListener {
+                listener.onClick(item)
+            }
         }
     }
 
-    class BookingChainTitleViewHolder(
+    inner class BookingChainTitleViewHolder(
         private val binding: TripsHeaderItemLayoutBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ChainTitle): Unit = with(binding) {
             tripsHeader.text = item.title
         }
+    }
+
+    interface ClickListener {
+        fun onClick(chain: BookingChain)
     }
 }
 
