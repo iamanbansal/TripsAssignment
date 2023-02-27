@@ -7,7 +7,7 @@ package com.booking.tripsassignment.utils
 sealed class Resource<out R> {
     object Loading : Resource<Nothing>()
     data class Success<out R>(val data: R) : Resource<R>()
-    data class Error(val exception: Exception) : Resource<Nothing>()
+    data class Error(val exception: Throwable) : Resource<Nothing>()
 
     /**
      * Get the result data if it is Success else null.

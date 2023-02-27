@@ -9,9 +9,8 @@ import java.lang.StringBuilder
 import java.util.*
 import kotlin.Comparator
 
-const val PAST_TRIPS_TITLE = "Past Trips"
-const val UPCOMING_TRIPS_TITLE = "Upcoming Trips"
-fun buildChainBySorting(list: List<Booking>): List<Chain> {
+
+fun buildChainBySorting(list: List<Booking>, pastTripTitle: String, upcomingTripTitle: String): List<Chain> {
     if (list.isEmpty()) return emptyList()
 
     //sort based on sorting
@@ -47,11 +46,11 @@ fun buildChainBySorting(list: List<Booking>): List<Chain> {
     //merge lists with title
     return ArrayList<Chain>().apply {
         if (upComingChains.isNotEmpty()) {
-            this.add(ChainTitle(UPCOMING_TRIPS_TITLE))
+            this.add(ChainTitle(upcomingTripTitle))
             this.addAll(upComingChains)
         }
         if (pastChains.isNotEmpty()) {
-            this.add(ChainTitle(PAST_TRIPS_TITLE))
+            this.add(ChainTitle(pastTripTitle))
             this.addAll(pastChains)
         }
     }
@@ -59,6 +58,7 @@ fun buildChainBySorting(list: List<Booking>): List<Chain> {
 
 fun buildBookingChain(chain: List<Booking>): BookingChain {
     return BookingChain(
+        chain.map { it.checkin }.joinToString { "" },
         chain,
         chain.first().checkin,
         chain.last().checkout,
