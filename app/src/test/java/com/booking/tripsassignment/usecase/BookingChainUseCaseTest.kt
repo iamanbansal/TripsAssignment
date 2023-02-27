@@ -22,7 +22,7 @@ class BookingChainUseCaseTest {
 
     @Before
     fun setUp() {
-        useCase = BookingChainUseCaseImpl(repository)
+        useCase = BookingChainUseCaseImpl(mock(),repository, mock())
     }
 
     @Test

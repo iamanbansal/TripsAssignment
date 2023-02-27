@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Trips</string>
+    <string name="past_trip_title">Past Trips</string>
+    <string name="upcoming_trip_title">Upcoming Trips</string>
 </resources>

@@ -102,6 +102,7 @@ data class Booker(
 interface Chain
 
 data class BookingChain(
+    val id:String,
     val list: List<Booking>,
     val checkin: LocalDate,
     val checkout: LocalDate,

@@ -9,12 +9,15 @@ import org.junit.Assert.*
 
 class BookingChainUtilKtTest {
 
+     val pastTripTitle = "Past Trips"
+     val upcomingTripTitle = "Upcoming Trips"
+
     @Test
     fun `test buildChainBySorting for past bookings`() {
         val booking = MockDataGenerator.bookingsForUser(TestCase.PAST_BOOKINGS.bookerId)
-        val chains = buildChainBySorting(booking!!)
+        val chains = buildChainBySorting(booking!!, pastTripTitle, upcomingTripTitle)
         val today = LocalDate.now()
-        assert((chains.first() as ChainTitle).title == PAST_TRIPS_TITLE)
+        assert((chains.first() as ChainTitle).title == pastTripTitle)
         for (i in 1..chains.lastIndex) {
             (chains[i] as BookingChain).list.forEach {
                 assert(it.checkin.isBefore(today))
@@ -26,9 +29,9 @@ class BookingChainUtilKtTest {
     fun `test buildChainBySorting for upcoming bookings`() {
 
         val booking = MockDataGenerator.bookingsForUser(TestCase.FUTURE_BOOKINGS.bookerId)
-        val chains = buildChainBySorting(booking!!)
+        val chains = buildChainBySorting(booking!!, pastTripTitle, upcomingTripTitle)
         val today = LocalDate.now()
-        assert((chains.first() as ChainTitle).title == UPCOMING_TRIPS_TITLE)
+        assert((chains.first() as ChainTitle).title == upcomingTripTitle)
         for (i in 1..chains.lastIndex) {
             (chains[i] as BookingChain).list.forEach {
                 assert(it.checkin.isAfter(today))
@@ -40,9 +43,9 @@ class BookingChainUtilKtTest {
     fun `test buildChainBySorting for past & upcoming bookings`() {
 
         val booking = MockDataGenerator.bookingsForUser(TestCase.MIX_1.bookerId)
-        val chains = buildChainBySorting(booking!!)
+        val chains = buildChainBySorting(booking!!, pastTripTitle, upcomingTripTitle)
         val today = LocalDate.now()
-        assert((chains.first() as ChainTitle).title == UPCOMING_TRIPS_TITLE)
+        assert((chains.first() as ChainTitle).title == upcomingTripTitle)
 
         var upcomingStartIndex = Int.MIN_VALUE
         for (i in 1..chains.lastIndex) {
@@ -57,7 +60,7 @@ class BookingChainUtilKtTest {
             }
         }
 
-        assert((chains[upcomingStartIndex] as ChainTitle).title == PAST_TRIPS_TITLE)
+        assert((chains[upcomingStartIndex] as ChainTitle).title == pastTripTitle)
         for (i in upcomingStartIndex + 1..chains.lastIndex) {
             (chains[i] as BookingChain).list.forEach {
                 assert(it.checkin.isBefore(today))
