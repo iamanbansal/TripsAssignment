@@ -21,7 +21,7 @@ interface BookingRepository {
      *
      *  - All the bookings emitted will belong to that user.
      */
-    suspend fun fetchBookings(userId: Int): Boolean
+    suspend fun fetchBookings(userId: Int)
     /**
      * Return the flow of state of list of booking
      */
@@ -34,21 +34,20 @@ interface BookingRepository {
  */
 class MockNetworkBookingRepository : BookingRepository {
 
-    private val resultFlow = MutableSharedFlow<Resource<List<Booking>>>(replay = 1)
+    private val resultFlow = MutableSharedFlow<Resource<List<Booking>>>()
 
     override suspend fun fetchBookings(userId: Int) = withContext(Dispatchers.IO) {
-        resultFlow.tryEmit(Resource.Loading)
 
         delay(Random.nextInt(10, 2000).toLong())
         if (Random.nextInt(0, 21) % 10 == 0) {
-            resultFlow.tryEmit(Resource.Error(NetworkError("API call error")))
+            resultFlow.emit(Resource.Error(NetworkError("API call error")))
         }
 
         val bookings = MockDataGenerator.bookingsForUser(userId)
         if (bookings == null) {
-            resultFlow.tryEmit(Resource.Error(NetworkError("API call error")))
+            resultFlow.emit(Resource.Error(NetworkError("API call error")))
         } else {
-            resultFlow.tryEmit(Resource.Success(bookings))
+            resultFlow.emit(Resource.Success(bookings))
         }
     }
 
