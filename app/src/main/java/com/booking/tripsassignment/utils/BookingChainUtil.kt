@@ -36,7 +36,7 @@ fun buildChainBySorting(list: List<Booking>, pastTripTitle: String, upcomingTrip
     //segregate chains into past and upcoming bookings
     chains.forEach {
         val chain = buildBookingChain(it)
-        if (chain.checkin.isBefore(now)) {
+        if (chain.list.first().checkin.isBefore(now)) {
             pastChains.add(chain)
         } else {
             upComingChains.add(chain)
@@ -60,8 +60,6 @@ fun buildBookingChain(chain: List<Booking>): BookingChain {
     return BookingChain(
         chain.map { it.checkin }.joinToString { "" },
         chain,
-        chain.first().checkin,
-        chain.last().checkout,
         getFormattedDateRange(chain),
         getFormattedTitle(chain),
         getFormattedBookingsCount(chain),

@@ -104,8 +104,6 @@ interface Chain
 data class BookingChain(
     val id:String,
     val list: List<Booking>,
-    val checkin: LocalDate,
-    val checkout: LocalDate,
     val dateRange: String,
     val title: String,
     val subTitle: String,
