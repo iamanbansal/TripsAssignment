@@ -9,38 +9,35 @@ import com.booking.tripsassignment.chaindetails.CHAIN_ID_KEY
 import com.booking.tripsassignment.chaindetails.ChainDetailsActivity
 import com.booking.tripsassignment.data.BookingChain
 import com.booking.tripsassignment.databinding.ActivityMainScreenBinding
-import com.booking.tripsassignment.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), BookingChainAdapter.ClickListener {
 
-    private val viewModel:BookingChainViewModel by viewModels()
-    private lateinit var binding:ActivityMainScreenBinding
+    private val viewModel: BookingChainViewModel by viewModels()
+    private lateinit var binding: ActivityMainScreenBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel.bookingChainsLiveData.observe(this){
-            binding.progressBar.isVisible = it is Resource.Loading
-            binding.message.isVisible = it is Resource.Error
-            binding.recyclerview.isVisible = it is Resource.Success
+        viewModel.bookingChainsLiveData.observe(this) {
+            binding.progressBar.isVisible = it.isLoading
 
-            when(it){
-                is Resource.Success->{
-                    if(it.data()!!.isEmpty()){
-                        binding.recyclerview.isVisible = false
-                        binding.message.text="Travel Booking Not Found"
-                        binding.message.isVisible = true
-                    }else {
-                        binding.recyclerview.adapter = BookingChainAdapter(it.data()!!, this)
-                    }
+            binding.message.apply {
+                isVisible = !it.error.isNullOrBlank()
+
+                if (it.error.isNullOrBlank().not()) {
+                    text = it.error
                 }
-                is Resource.Error->{
-                    binding.message.text = it.exception.message
+            }
+
+            binding.recyclerview.apply {
+                isVisible = it.chains.isNotEmpty()
+                if (it.chains.isNotEmpty()) {
+                    adapter = BookingChainAdapter(it.chains, this@MainActivity)
                 }
             }
         }

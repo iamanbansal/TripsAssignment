@@ -5,7 +5,6 @@ package com.booking.tripsassignment.utils
  * It's a sealed class which supports two types: Success And Error.
  */
 sealed class Resource<out R> {
-    object Loading : Resource<Nothing>()
     data class Success<out R>(val data: R) : Resource<R>()
     data class Error(val exception: Throwable) : Resource<Nothing>()
 

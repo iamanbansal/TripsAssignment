@@ -3,9 +3,9 @@ package com.booking.tripsassignment.chaindetails
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.booking.tripsassignment.usecase.BookingChainUseCase
 import com.booking.tripsassignment.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,8 +16,14 @@ class BookingChainDetailsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val bookingChainsLiveData = repository.getBookingChainFlow()
+        .map {
+            when (it) {
+                is Resource.Success -> BookingChainDetailsUiState(chain = it.data())
+                is Resource.Error -> BookingChainDetailsUiState(error = it.exception.message)
+            }
+        }
         .onStart {
-            emit(Resource.Loading)
+            BookingChainDetailsUiState(isLoading = true)
         }
         .asLiveData(viewModelScope.coroutineContext)
 

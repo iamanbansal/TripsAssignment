@@ -9,10 +9,7 @@ import com.booking.tripsassignment.resource.ResourceManager
 import com.booking.tripsassignment.utils.Resource
 import com.booking.tripsassignment.utils.buildChainBySorting
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.*
 
 interface BookingChainUseCase {
     fun getBookingsChain(): Flow<Resource<List<Chain>>>
@@ -26,10 +23,8 @@ class BookingChainUseCaseImpl(
 ) : BookingChainUseCase {
     override fun getBookingsChain(): Flow<Resource<List<Chain>>> {
         return bookingRepository.getBookingsFlow()
-            .mapLatest {
+            .map {
                 when (it) {
-                    is Resource.Loading -> Resource.Loading
-
                     is Resource.Success -> {
                         val pastTripTitle = resourceManager.getString(R.string.past_trip_title)
                         val upcomingTripTitle = resourceManager.getString(R.string.upcoming_trip_title)
@@ -37,7 +32,6 @@ class BookingChainUseCaseImpl(
                         chainDetailsRepository.storeChain(chainList)
                         Resource.Success(chainList)
                     }
-
                     is Resource.Error -> Resource.Error(it.exception)
                 }
             }
